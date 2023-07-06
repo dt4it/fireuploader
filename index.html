@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Upload</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="fireupload.css">
+</head>
+<body>
+<div class="container mt-5">
+    <form action="upload.php" method="post" enctype="multipart/form-data">
+        <div id="dropzone" class="mb-3">
+            <div id="preview"></div>
+            <div class="add-icon hidden" id="add-icon">
+                <i class="fas fa-plus"></i>
+            </div>
+            <p>Drag and drop files here</p>
+            <p>Or</p>
+            <label for="fileinput" class="choose-file-label">
+                <i class="fas fa-upload"></i>
+                Choose Files
+            </label>
+            <input type="file" id="fileinput"
+                   class="choose-file-input"
+                   multiple
+            />
+
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="fireupload.js"></script>
+<script>
+    $(document).ready(function () {
+        var files_arr = {
+            files: [
+                {
+                    size: 1020.5185546875,
+                    type: 'image/png',
+                    order: 1,
+                    thumbs: [],
+                    is_image: 1,
+                    raw_name: '1688479052_6d4345532eaf0cba30d1.png',
+                    dimension: '1440710',
+                    extension: 'png',
+                    full_path: 'images/02.png',
+                    original_name: '01.png',
+                },
+                {
+                    size: 14.388671875,
+                    type: 'image/jpeg',
+                    order: 2,
+                    thumbs: [],
+                    is_image: 1,
+                    raw_name: '1688479052_eee6c3ad57ecd0597b46.jpg',
+                    dimension: '750422',
+                    extension: 'jpg',
+                    full_path: 'images/dart.jpg',
+                    original_name: 'dart.jpg',
+                },
+            ],
+            fileCount: 2,
+        };
+
+        var uploader = new FireUploader({
+            files: files_arr,
+        });
+    });
+</script>
+</body>
+</html>
