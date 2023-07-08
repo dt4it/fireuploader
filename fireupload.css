@@ -25,7 +25,10 @@ body {
 
 /* Image Preview Styles */
 #preview {
-    display: inline-block; /* This ensures that the items are sorted within their parent (#dropzone) */
+    display: flex; /* This makes items display in a row */
+    flex-wrap: nowrap; /* This prevents items from wrapping to the next line */
+    align-items: flex-start; /* This aligns items to the top */
+    overflow-x: auto; /* This allows horizontal scrolling if the items overflow */
 }
 
 .preview-item {

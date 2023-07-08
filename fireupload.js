@@ -1,5 +1,5 @@
 class FireUploader {
-    constructor(options = {}) { // Default to an empty object if no argument is passed
+    constructor(options = {}) {
         this.$dropzone = $('#dropzone');
         this.$preview = $('#preview');
         this.$addIcon = $('#add-icon');
@@ -10,7 +10,6 @@ class FireUploader {
     }
 
     init() {
-
         this.$dropzone.on('dragover', (event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -46,30 +45,15 @@ class FireUploader {
             $('#fileinput').click();
         });
 
-        this.$preview.sortable({
-            containment: 'parent',
-            tolerance: 'pointer',
-            cursor: 'move',
-            placeholder: 'sortable-placeholder',
+        Sortable.create(this.$preview[0], {
             handle: '.drag-drop-icon',
-            start: (event, ui) => {
-                ui.placeholder.height(ui.helper.outerHeight());
-            },
-            sort: (event, ui) => {
-                const containerScrollLeft = this.$preview.scrollLeft();
-                const containerWidth = this.$preview.width();
-                const itemWidth = ui.helper.outerWidth();
-                const leftOffset = ui.position.left - containerScrollLeft;
-
-                if (leftOffset < 0 || leftOffset > containerWidth - itemWidth) {
-                    this.$preview.css('cursor', 'not-allowed');
-                } else {
-                    this.$preview.css('cursor', 'move');
-                }
-            },
-            stop: (event, ui) => {
-                this.$preview.css('cursor', 'auto');
-            },
+            animation: 150,
+            onEnd: (event) => {
+                const item = event.item;
+                const newIndex = event.newIndex;
+                const filename = item.getAttribute('data-filename');
+                // Perform any necessary operations with the new index and filename
+            }
         });
     }
 
