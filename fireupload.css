@@ -10,7 +10,7 @@ body {
 }
 
 /* Dropzone Styles */
-#dropzone {
+.fireupload {
     border: 2px dashed #ccc;
     padding: 20px;
     text-align: center;
@@ -18,13 +18,13 @@ body {
     min-height: 100px;
 }
 
-#dropzone.dragover {
+.fireupload.dragover {
     background-color: #f7f7f7;
     border-color: #999;
 }
 
 /* Image Preview Styles */
-#preview {
+.preview {
     display: flex;
     flex-wrap: wrap; /* Wrap the items to the next line */
     align-items: flex-start;
@@ -130,8 +130,6 @@ body {
 }
 
 /* Zoom Popup Styles */
-
-
 .zoom-popup {
     position: fixed;
     top: 0;
@@ -151,6 +149,7 @@ body {
     max-width: 80vw;
     object-fit: contain;
 }
+
 .zoom-popup .active-image {
     display: block; /* Only show the active image */
 }
@@ -179,7 +178,6 @@ body {
     transition: background-color 0.3s ease;
     z-index: 1;
 }
-
 
 .zoom-popup .close-icon:hover {
     background-color: rgba(0, 0, 0, 0.8);

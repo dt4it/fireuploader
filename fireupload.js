@@ -1,9 +1,9 @@
 class FireUploader {
-    constructor(options = {}) {
-        this.$dropzone = $('#dropzone');
-        this.$preview = $('#preview');
-        this.$addIcon = $('#add-icon');
-        this.files = options.files || [];
+    constructor(containerId) {
+        this.$dropzone = $(containerId);
+        this.$preview = this.$dropzone.find('.preview');
+        this.$addIcon = this.$dropzone.find('.add-icon');
+        this.files = [];
 
         this.init();
         this.handlePreloadedFiles();
@@ -37,12 +37,14 @@ class FireUploader {
             this.handleFiles(droppedFiles);
         });
 
-        $('#fileinput').on('change', (event) => {
+        const fileInput = this.$dropzone.find('.choose-file-input');
+        fileInput.on('change', (event) => {
             this.handleFiles(event.target.files);
         });
 
-        this.$addIcon.on('click', () => {
-            $('#fileinput').click();
+        const addIcon = this.$dropzone.find('.add-icon');
+        addIcon.on('click', () => {
+            fileInput.click();
         });
 
         Sortable.create(this.$preview[0], {
@@ -62,6 +64,7 @@ class FireUploader {
             this.showZoomPopup(index);
         });
     }
+
     showZoomPopup(index) {
 
         const $popup = $('.zoom-popup'); // Get the existing zoom popup if it exists
@@ -167,7 +170,7 @@ class FireUploader {
             'data-filename': fileData.name,
         });
 
-        const iconsDiv = $('<div>', { class: 'icons' });
+        const iconsDiv = $('<div>', {class: 'icons'});
         const removeIcon = $('<span>', {
             class: 'remove-icon',
             html: '<i class="fas fa-trash"></i>',
@@ -200,7 +203,7 @@ class FireUploader {
 
         zoomIcon.on('click', (event) => {
 
-            const $popup = $('<div>', { class: 'zoom-popup' });
+            const $popup = $('<div>', {class: 'zoom-popup'});
             const $zoomedImg = $('<img>', {
                 class: 'zoomed-image',
                 src: fileData.dataUrl,
