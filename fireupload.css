@@ -26,9 +26,8 @@ body {
 /* Image Preview Styles */
 #preview {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap; /* Wrap the items to the next line */
     align-items: flex-start;
-    overflow-x: auto;
 }
 
 .preview-item {
