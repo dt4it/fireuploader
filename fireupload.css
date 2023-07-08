@@ -25,10 +25,10 @@ body {
 
 /* Image Preview Styles */
 #preview {
-    display: flex; /* This makes items display in a row */
-    flex-wrap: nowrap; /* This prevents items from wrapping to the next line */
-    align-items: flex-start; /* This aligns items to the top */
-    overflow-x: auto; /* This allows horizontal scrolling if the items overflow */
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    overflow-x: auto;
 }
 
 .preview-item {
@@ -80,7 +80,6 @@ body {
     background-color: rgba(255, 255, 255, 0.8);
 }
 
-
 /* Add Icon Styles */
 .add-icon {
     border: 2px dashed #ccc;
@@ -90,9 +89,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
+    margin-right: 10px;
     color: #ccc;
     font-size: 30px;
 }
@@ -147,27 +144,43 @@ body {
     z-index: 999;
 }
 
-.zoom-popup img {
-    max-width: 90%;
-    max-height: 90%;
+.zoom-popup .zoomed-image {
+    max-height: 80vh;
+    max-width: 80vw;
+    object-fit: contain;
 }
 
-.zoom-popup .close-icon {
+.zoom-popup .close-icon,
+.zoom-popup .nav-icon {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     color: #fff;
     font-size: 30px;
     cursor: pointer;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s ease;
+    z-index: 1;
 }
 
-.zoomed-image {
-    max-height: 80vh;
-    max-width: 80vw;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.zoom-popup .close-icon {
+    right: 10px;
+}
+
+.zoom-popup .nav-icon {
+    display: flex;
+    align-items: center;
+}
+
+.zoom-popup .nav-icon.disabled {
+    opacity: 0.3;
+    cursor: default;
+    pointer-events: none;
+}
+
+.zoom-popup .nav-icon i {
+    margin: 0 5px;
 }
 
 /* Border Box Styles */

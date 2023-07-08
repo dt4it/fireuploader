@@ -55,6 +55,17 @@ class FireUploader {
                 // Perform any necessary operations with the new index and filename
             }
         });
+
+        this.$preview.on('click', '.preview-item', (event) => {
+            const $target = $(event.target).closest('.preview-item');
+            const index = $target.index();
+            this.showZoomPopup(index);
+        });
+
+        // Check if there are no previewed images to hide the add icon initially
+        if (this.$preview.find('.preview-item').length === 0) {
+            this.$addIcon.addClass('hidden');
+        }
     }
 
     handleFiles(selectedFiles) {
@@ -65,6 +76,7 @@ class FireUploader {
                     this.addPreviewItem({
                         dataUrl: event.target.result,
                         name: file.name,
+
                     });
                 };
                 reader.readAsDataURL(file);
@@ -114,10 +126,15 @@ class FireUploader {
 
         div.append(img);
         div.append(iconsDiv);
+
         this.$preview.append(div);
 
         removeIcon.on('click', () => {
             div.remove();
+            // Check if there are no previewed images to show the add icon
+            if (this.$preview.find('.preview-item').length === 0) {
+                this.$addIcon.removeClass('hidden');
+            }
         });
 
         zoomIcon.on('click', () => {
@@ -130,16 +147,46 @@ class FireUploader {
                 class: 'close-icon',
                 html: '&times;',
             });
+            const $prevIcon = $('<span>', {
+                class: 'nav-icon prev-icon',
+                html: '<i class="fas fa-chevron-left"></i>',
+            });
+            const $nextIcon = $('<span>', {
+                class: 'nav-icon next-icon',
+                html: '<i class="fas fa-chevron-right"></i>',
+            });
 
             $popup.append($zoomedImg);
             $popup.append($closeIcon);
+            $popup.append($prevIcon);
+            $popup.append($nextIcon);
             $popup.appendTo('body');
 
             $closeIcon.on('click', function () {
                 $popup.remove();
             });
+
+            $prevIcon.on('click', () => {
+                const currentIndex = this.$preview.find('.preview-item').index(div);
+                if (currentIndex > 0) {
+                    const $prevItem = this.$preview.find('.preview-item').eq(currentIndex - 1);
+                    const prevDataUrl = $prevItem.find('img').attr('src');
+                    $zoomedImg.attr('src', prevDataUrl);
+                }
+            });
+
+            $nextIcon.on('click', () => {
+                const currentIndex = this.$preview.find('.preview-item').index(div);
+                if (currentIndex < this.$preview.find('.preview-item').length - 1) {
+                    const $nextItem = this.$preview.find('.preview-item').eq(currentIndex + 1);
+                    const nextDataUrl = $nextItem.find('img').attr('src');
+                    $zoomedImg.attr('src', nextDataUrl);
+                }
+            });
         });
 
+        // Move the add-icon after the last previewed image
+        this.$addIcon.insertAfter(this.$preview.find('.preview-item').last());
         this.$addIcon.removeClass('hidden');
     }
 }

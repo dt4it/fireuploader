@@ -12,20 +12,16 @@
     <form action="upload.php" method="post" enctype="multipart/form-data">
         <div id="dropzone" class="mb-3">
             <div id="preview"></div>
-            <div class="add-icon hidden" id="add-icon">
-                <i class="fas fa-plus"></i>
-            </div>
             <p>Drag and drop files here</p>
             <p>Or</p>
             <label for="fileinput" class="choose-file-label">
                 <i class="fas fa-upload"></i>
                 Choose Files
             </label>
-            <input type="file" id="fileinput"
-                   class="choose-file-input"
-                   multiple
-            />
-
+            <input type="file" id="fileinput" class="choose-file-input" multiple />
+            <div class="add-icon hidden" id="add-icon">
+                <i class="fas fa-plus"></i>
+            </div>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
