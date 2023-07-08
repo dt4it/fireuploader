@@ -61,11 +61,73 @@ class FireUploader {
             const index = $target.index();
             this.showZoomPopup(index);
         });
+    }
+    showZoomPopup(index) {
 
-        // Check if there are no previewed images to hide the add icon initially
-        if (this.$preview.find('.preview-item').length === 0) {
-            this.$addIcon.addClass('hidden');
+        const $popup = $('.zoom-popup'); // Get the existing zoom popup if it exists
+        if ($popup.length > 0) {
+            $popup.remove(); // Remove any existing zoom popups
         }
+
+        const $zoomedImg = $('<img>', {
+            class: 'zoomed-image',
+            src: '',
+        });
+        const $closeIcon = $('<span>', {
+            class: 'close-icon',
+            html: '&times;',
+        });
+        const $prevIcon = $('<span>', {
+            class: 'nav-icon prev-icon',
+            html: '<i class="fas fa-chevron-left"></i>',
+        });
+        const $nextIcon = $('<span>', {
+            class: 'nav-icon next-icon',
+            html: '<i class="fas fa-chevron-right"></i>',
+        });
+
+        const $newPopup = $('<div>', { class: 'zoom-popup' });
+        $newPopup.append($zoomedImg);
+        $newPopup.append($closeIcon);
+        $newPopup.append($prevIcon);
+        $newPopup.append($nextIcon);
+        $newPopup.appendTo('body');
+
+        const $previewItems = this.$preview.find('.preview-item');
+        const totalItems = $previewItems.length;
+
+        $zoomedImg.addClass('active-image'); // Add an active class to the initial image
+
+        $prevIcon.on('click', () => {
+            $('.active-image').removeClass('active-image'); // Remove active class from all images
+            $zoomedImg.attr('src', ''); // Clear current image
+            index = (index - 1 + totalItems) % totalItems;
+            const $currentItem = $previewItems.eq(index);
+            const currentDataUrl = $currentItem.find('img').attr('src');
+            $zoomedImg.attr('src', currentDataUrl);
+            $zoomedImg.addClass('active-image'); // Add active class to the new image
+        });
+
+        $nextIcon.on('click', () => {
+            $('.active-image').removeClass('active-image'); // Remove active class from all images
+            $zoomedImg.attr('src', ''); // Clear current image
+            index = (index + 1) % totalItems;
+            const $currentItem = $previewItems.eq(index);
+            const currentDataUrl = $currentItem.find('img').attr('src');
+            $zoomedImg.attr('src', currentDataUrl);
+            $zoomedImg.addClass('active-image'); // Add active class to the new image
+        });
+
+        $closeIcon.on('click', function (event) {
+            event.stopPropagation(); // Prevent the event from bubbling up to other elements
+            $('.zoom-popup').remove(); // Remove the entire popup
+            console.log('Close icon clicked'); // Log the click event
+        });
+
+        // Set the initial image
+        const $currentItem = $previewItems.eq(index);
+        const initialDataUrl = $currentItem.find('img').attr('src');
+        $zoomedImg.attr('src', initialDataUrl);
     }
 
     handleFiles(selectedFiles) {
@@ -76,7 +138,6 @@ class FireUploader {
                     this.addPreviewItem({
                         dataUrl: event.target.result,
                         name: file.name,
-
                     });
                 };
                 reader.readAsDataURL(file);
@@ -137,7 +198,8 @@ class FireUploader {
             }
         });
 
-        zoomIcon.on('click', () => {
+        zoomIcon.on('click', (event) => {
+
             const $popup = $('<div>', { class: 'zoom-popup' });
             const $zoomedImg = $('<img>', {
                 class: 'zoomed-image',
@@ -185,8 +247,9 @@ class FireUploader {
             });
         });
 
+
         // Move the add-icon after the last previewed image
-        this.$addIcon.insertAfter(this.$preview.find('.preview-item').last());
+        this.$addIcon.appendTo(this.$preview);
         this.$addIcon.removeClass('hidden');
     }
 }
