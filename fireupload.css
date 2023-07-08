@@ -25,10 +25,7 @@ body {
 
 /* Image Preview Styles */
 #preview {
-    margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: inline-block; /* This ensures that the items are sorted within their parent (#dropzone) */
 }
 
 .preview-item {
@@ -79,6 +76,7 @@ body {
 .preview-item .drag-drop-icon:hover {
     background-color: rgba(255, 255, 255, 0.8);
 }
+
 
 /* Add Icon Styles */
 .add-icon {
