@@ -1,14 +1,22 @@
 class FireUploader {
-    constructor(containerId) {
-        this.$dropzone = $(containerId);
-        this.$preview = this.$dropzone.find('.preview');
-        this.$addIcon = this.$dropzone.find('.add-icon');
-        this.files = [];
+    constructor(dropzoneId, inputName = 'file', files_arr = {files: [], fileCount: 0}) {
+        $(".fireupload").each((index, element) => {
+            if ($(element).attr('id') == dropzoneId) {
+                const instance = Object.create(FireUploader.prototype);
+                instance.$dropzone = $(element);
+                instance.$preview = $('<div>', {class: 'preview'}).appendTo(instance.$dropzone);
+                instance.$fileInput = $('<input>', {type: 'file', name: inputName, class: 'choose-file-input', multiple: true, id: 'fileInput' + instance.$dropzone.attr('id')}).appendTo(instance.$dropzone);
+                instance.$chooseFileLabel = $('<label>', {for: 'fileInput' + instance.$dropzone.attr('id'), class: 'choose-file-label'}).html('<i class="fas fa-upload"></i>Choose Files').appendTo(instance.$dropzone);
+                instance.$addIcon = $('<div>', {class: 'add-icon hidden'}).html('<i class="fas fa-plus"></i>').appendTo(instance.$dropzone);
+                instance.$dropzone.append($('<p>').text('Drag and drop files here'), $('<p>').text('Or'), instance.$chooseFileLabel, instance.$fileInput, instance.$addIcon);
 
-        this.init();
-        this.handlePreloadedFiles();
+                instance.files = files_arr;
+
+                instance.init();
+                instance.handlePreloadedFiles();
+            }
+        });
     }
-
     init() {
         this.$dropzone.on('dragover', (event) => {
             event.preventDefault();
