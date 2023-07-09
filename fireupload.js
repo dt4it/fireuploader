@@ -68,7 +68,6 @@ class FireUploader {
         fileInput.on('change', (event) => {
             if (!this.multipleFiles) {
                 this.$preview.empty(); // Clear existing preview items when replacing files
-                this.$addIcon.addClass('hidden'); // Hide the add icon when selecting files
             }
             this.handleFiles(event.target.files);
         });
@@ -152,6 +151,7 @@ class FireUploader {
             $zoomedImg.attr('src', currentDataUrl);
             $zoomedImg.addClass('active-image'); // Add active class to the new image
         });
+
         $closeIcon.on('click', function (event) {
             event.stopPropagation(); // Prevent the event from bubbling up to other elements
             $('.zoom-popup').remove(); // Remove the entire popup
@@ -201,7 +201,7 @@ class FireUploader {
             'data-filename': fileData.name,
         });
 
-        const iconsDiv = $('<div>', {class: 'icons'});
+        const iconsDiv = $('<div>', { class: 'icons' });
         const removeIcon = $('<span>', {
             class: 'remove-icon',
             html: '<i class="fas fa-trash"></i>',
@@ -233,6 +233,7 @@ class FireUploader {
         });
 
         zoomIcon.on('click', (event) => {
+
             const $popup = $('<div>', {class: 'zoom-popup'});
             const $zoomedImg = $('<img>', {
                 class: 'zoomed-image',
@@ -283,16 +284,11 @@ class FireUploader {
         // Move the add-icon after the last previewed image
         if (this.$preview.find('.preview-item').length > 1 || !this.multipleFiles) {
             this.$addIcon.appendTo(this.$preview);
-            if (!this.multipleFiles) {
-                this.$addIcon.addClass('hidden'); // Hide the add icon when multipleFiles is false
-            }
+            this.$addIcon.removeClass('hidden');
         } else {
             this.$addIcon.addClass('hidden');
         }
 
-        // Hide the drag and drop icon when multipleFiles is false
-        if (!this.multipleFiles) {
-            div.find('.drag-drop-icon').hide();
-        }
+
     }
 }
