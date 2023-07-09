@@ -63,8 +63,8 @@
             ],
             fileCount: 2,
         };
-        var uploader = new FireUploader("dropzone1","test", files_arr);
-        var uploader = new FireUploader("dropzone2","test2");
+        var uploader = new FireUploader({dropzoneId: 'dropzone1', inputName: "test1", multipleFiles: true, files: files_arr});
+        var uploader = new FireUploader({dropzoneId: 'dropzone2', inputName: "test2", multipleFiles: false});
 
     });
 </script>

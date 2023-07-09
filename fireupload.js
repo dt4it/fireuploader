@@ -1,22 +1,38 @@
 class FireUploader {
-    constructor(dropzoneId, inputName = 'file', files_arr = {files: [], fileCount: 0}) {
+    constructor({dropzoneId, inputName = 'file', multipleFiles = false, files = {files: [], fileCount: 0}} = {}) {
         $(".fireupload").each((index, element) => {
             if ($(element).attr('id') == dropzoneId) {
                 const instance = Object.create(FireUploader.prototype);
                 instance.$dropzone = $(element);
                 instance.$preview = $('<div>', {class: 'preview'}).appendTo(instance.$dropzone);
-                instance.$fileInput = $('<input>', {type: 'file', name: inputName, class: 'choose-file-input', multiple: true, id: 'fileInput' + instance.$dropzone.attr('id')}).appendTo(instance.$dropzone);
-                instance.$chooseFileLabel = $('<label>', {for: 'fileInput' + instance.$dropzone.attr('id'), class: 'choose-file-label'}).html('<i class="fas fa-upload"></i>Choose Files').appendTo(instance.$dropzone);
+                instance.$fileInput = $('<input>', {
+                    type: 'file',
+                    name: inputName,
+                    class: 'choose-file-input',
+                    multiple: multipleFiles,
+                    id: 'fileInput' + instance.$dropzone.attr('id')
+                }).appendTo(instance.$dropzone);
+                instance.$chooseFileLabel = $('<label>', {
+                    for: 'fileInput' + instance.$dropzone.attr('id'),
+                    class: 'choose-file-label'
+                }).html('<i class="fas fa-upload"></i>Choose Files').appendTo(instance.$dropzone);
                 instance.$addIcon = $('<div>', {class: 'add-icon hidden'}).html('<i class="fas fa-plus"></i>').appendTo(instance.$dropzone);
                 instance.$dropzone.append($('<p>').text('Drag and drop files here'), $('<p>').text('Or'), instance.$chooseFileLabel, instance.$fileInput, instance.$addIcon);
 
-                instance.files = files_arr;
+                instance.files = files;
+                instance.multipleFiles = multipleFiles;
 
                 instance.init();
                 instance.handlePreloadedFiles();
+
+                if (!multipleFiles) {
+                    instance.$addIcon.addClass('hidden');
+                    instance.$dropzone.find('.drag-drop-icon').hide();
+                }
             }
         });
     }
+
     init() {
         this.$dropzone.on('dragover', (event) => {
             event.preventDefault();
@@ -42,11 +58,18 @@ class FireUploader {
             this.$dropzone.removeClass('dragover');
 
             const droppedFiles = event.originalEvent.dataTransfer.files;
+            if (!this.multipleFiles) {
+                this.$preview.empty(); // Clear existing preview items when replacing files
+            }
             this.handleFiles(droppedFiles);
         });
 
         const fileInput = this.$dropzone.find('.choose-file-input');
         fileInput.on('change', (event) => {
+            if (!this.multipleFiles) {
+                this.$preview.empty(); // Clear existing preview items when replacing files
+                this.$addIcon.addClass('hidden'); // Hide the add icon when selecting files
+            }
             this.handleFiles(event.target.files);
         });
 
@@ -55,16 +78,18 @@ class FireUploader {
             fileInput.click();
         });
 
-        Sortable.create(this.$preview[0], {
-            handle: '.drag-drop-icon',
-            animation: 150,
-            onEnd: (event) => {
-                const item = event.item;
-                const newIndex = event.newIndex;
-                const filename = item.getAttribute('data-filename');
-                // Perform any necessary operations with the new index and filename
-            }
-        });
+        if (this.multipleFiles) {
+            Sortable.create(this.$preview[0], {
+                handle: '.drag-drop-icon',
+                animation: 150,
+                onEnd: (event) => {
+                    const item = event.item;
+                    const newIndex = event.newIndex;
+                    const filename = item.getAttribute('data-filename');
+                    // Perform any necessary operations with the new index and filename
+                }
+            });
+        }
 
         this.$preview.on('click', '.preview-item', (event) => {
             const $target = $(event.target).closest('.preview-item');
@@ -74,7 +99,6 @@ class FireUploader {
     }
 
     showZoomPopup(index) {
-
         const $popup = $('.zoom-popup'); // Get the existing zoom popup if it exists
         if ($popup.length > 0) {
             $popup.remove(); // Remove any existing zoom popups
@@ -97,7 +121,7 @@ class FireUploader {
             html: '<i class="fas fa-chevron-right"></i>',
         });
 
-        const $newPopup = $('<div>', { class: 'zoom-popup' });
+        const $newPopup = $('<div>', {class: 'zoom-popup'});
         $newPopup.append($zoomedImg);
         $newPopup.append($closeIcon);
         $newPopup.append($prevIcon);
@@ -128,7 +152,6 @@ class FireUploader {
             $zoomedImg.attr('src', currentDataUrl);
             $zoomedImg.addClass('active-image'); // Add active class to the new image
         });
-
         $closeIcon.on('click', function (event) {
             event.stopPropagation(); // Prevent the event from bubbling up to other elements
             $('.zoom-popup').remove(); // Remove the entire popup
@@ -210,7 +233,6 @@ class FireUploader {
         });
 
         zoomIcon.on('click', (event) => {
-
             const $popup = $('<div>', {class: 'zoom-popup'});
             const $zoomedImg = $('<img>', {
                 class: 'zoomed-image',
@@ -258,9 +280,19 @@ class FireUploader {
             });
         });
 
-
         // Move the add-icon after the last previewed image
-        this.$addIcon.appendTo(this.$preview);
-        this.$addIcon.removeClass('hidden');
+        if (this.$preview.find('.preview-item').length > 1 || !this.multipleFiles) {
+            this.$addIcon.appendTo(this.$preview);
+            if (!this.multipleFiles) {
+                this.$addIcon.addClass('hidden'); // Hide the add icon when multipleFiles is false
+            }
+        } else {
+            this.$addIcon.addClass('hidden');
+        }
+
+        // Hide the drag and drop icon when multipleFiles is false
+        if (!this.multipleFiles) {
+            div.find('.drag-drop-icon').hide();
+        }
     }
 }
