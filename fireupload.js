@@ -1,42 +1,32 @@
 class FireUploader {
-    constructor({dropzoneId, inputName = 'file', multipleFiles = false, files = {files: [], fileCount: 0}, allowedExtensions = []} = {}) {
+    constructor({
+                    dropzoneId,
+                    inputName = 'file',
+                    multipleFiles = false,
+                    files = { files: [], fileCount: 0 },
+                    allowedExtensions = []
+                } = {}) {
         this.allowedExtensions = allowedExtensions;
-        $(".fireupload").each((index, element) => {
-            if ($(element).attr('id') === dropzoneId) {
-                this.setUpInstance(element, inputName, multipleFiles, files);
-            }
-        });
-    }
-
-    setUpInstance(element, inputName, multipleFiles, files) {
-        this.initializeInstanceProperties(element, inputName, multipleFiles, files);
-        this.init();
-        this.handlePreloadedFiles();
-
-        if (!this.multipleFiles) {
-            this.$addIcon.addClass('hidden');
-            this.$dropzone.find('.drag-drop-icon').hide();
-        }
-    }
-
-    initializeInstanceProperties(element, inputName, multipleFiles, files) {
-        this.$dropzone = $(element);
+        this.dropzoneId = dropzoneId;
+        this.inputName = inputName;
+        this.multipleFiles = multipleFiles;
+        this.files = files;
+        this.$dropzone = $(`#${dropzoneId}`);
         this.$preview = this.createElementWithClass('div', 'preview').appendTo(this.$dropzone);
         this.$fileInput = this.createFileInputElement(inputName, multipleFiles).appendTo(this.$dropzone);
         this.$chooseFileLabel = this.createFileInputLabel().appendTo(this.$dropzone);
         this.$addIcon = this.createAddIconElement().appendTo(this.$dropzone);
         this.$dropzone.append(this.createDropzoneMessageElements());
-
-        this.files = files;
-        this.multipleFiles = multipleFiles;
+        this.init();
+        this.handlePreloadedFiles();
     }
 
     createElementWithClass(elementType, className) {
-        return $('<' + elementType + '>', {class: className});
+        return $('<' + elementType + '>', { class: className });
     }
 
     createFileInputElement(inputName, multipleFiles) {
-        const fileInputElementId = 'fileInput' + this.$dropzone.attr('id');
+        const fileInputElementId = `fileInput${this.dropzoneId}`;
         return $('<input>', {
             type: 'file',
             name: inputName,
@@ -47,7 +37,7 @@ class FireUploader {
     }
 
     createFileInputLabel() {
-        const labelFor = 'fileInput' + this.$dropzone.attr('id');
+        const labelFor = `fileInput${this.dropzoneId}`;
         return $('<label>', {
             for: labelFor,
             class: 'choose-file-label'
@@ -55,7 +45,7 @@ class FireUploader {
     }
 
     createAddIconElement() {
-        return $('<div>', {class: 'add-icon hidden'}).html('<i class="fas fa-plus"></i>');
+        return $('<div>', { class: 'add-icon hidden' }).html('<i class="fas fa-plus"></i>');
     }
 
     createDropzoneMessageElements() {
@@ -63,13 +53,7 @@ class FireUploader {
     }
 
     init() {
-        this.$dropzone.on('dragover', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            this.$dropzone.addClass('dragover');
-        });
-
-        this.$dropzone.on('dragenter', (event) => {
+        this.$dropzone.on('dragover dragenter', (event) => {
             event.preventDefault();
             event.stopPropagation();
             this.$dropzone.addClass('dragover');
@@ -85,10 +69,9 @@ class FireUploader {
             event.preventDefault();
             event.stopPropagation();
             this.$dropzone.removeClass('dragover');
-
             const droppedFiles = event.originalEvent.dataTransfer.files;
             if (!this.multipleFiles) {
-                this.$preview.empty(); // Clear existing preview items when replacing files
+                this.$preview.empty();
             }
             this.handleFiles(droppedFiles);
         });
@@ -96,7 +79,7 @@ class FireUploader {
         const fileInput = this.$dropzone.find('.choose-file-input');
         fileInput.on('change', (event) => {
             if (!this.multipleFiles) {
-                this.$preview.empty(); // Clear existing preview items when replacing files
+                this.$preview.empty();
             }
             this.handleFiles(event.target.files);
         });
@@ -111,21 +94,13 @@ class FireUploader {
                 handle: '.drag-drop-icon',
                 animation: 150,
                 onEnd: (event) => {
-                    const item = event.item;
-                    const newIndex = event.newIndex;
-                    const oldIndex = event.oldIndex;
+                    const { item, newIndex, oldIndex } = event;
                     const filename = item.getAttribute('data-filename');
-
-                    // Move the file in the this.files.files array
                     const movedFile = this.files.files.splice(oldIndex, 1)[0];
                     this.files.files.splice(newIndex, 0, movedFile);
-
-                    // Update the order property of each file
                     this.files.files.forEach((file, index) => {
                         file.order = index + 1;
                     });
-
-                    // Update the hidden inputs with the new file values
                     this.$preview.find('.preview-item').each((index, previewItem) => {
                         const $previewItem = $(previewItem);
                         const $hiddenInput = $previewItem.find('.hidden-file-input');
@@ -143,29 +118,29 @@ class FireUploader {
     }
 
     showZoomPopup(index) {
-        const $popup = $('.zoom-popup'); // Get the existing zoom popup if it exists
+        const $popup = $('.zoom-popup');
         if ($popup.length > 0) {
-            $popup.remove(); // Remove any existing zoom popups
+            $popup.remove();
         }
 
         const $zoomedImg = $('<img>', {
             class: 'zoomed-image',
-            src: '',
+            src: ''
         });
         const $closeIcon = $('<span>', {
             class: 'close-icon',
-            html: '&times;',
+            html: '&times;'
         });
         const $prevIcon = $('<span>', {
             class: 'nav-icon prev-icon',
-            html: '<i class="fas fa-chevron-left"></i>',
+            html: '<i class="fas fa-chevron-left"></i>'
         });
         const $nextIcon = $('<span>', {
             class: 'nav-icon next-icon',
-            html: '<i class="fas fa-chevron-right"></i>',
+            html: '<i class="fas fa-chevron-right"></i>'
         });
 
-        const $newPopup = $('<div>', {class: 'zoom-popup'});
+        const $newPopup = $('<div>', { class: 'zoom-popup' });
         $newPopup.append($zoomedImg);
         $newPopup.append($closeIcon);
         $newPopup.append($prevIcon);
@@ -175,7 +150,7 @@ class FireUploader {
         const $previewItems = this.$preview.find('.preview-item');
         const totalItems = $previewItems.length;
 
-        $zoomedImg.addClass('active-image'); // Add an active class to the initial image
+        $zoomedImg.addClass('active-image');
 
         $prevIcon.on('click', () => {
             $('.active-image').removeClass('active-image'); // Remove active class from all images
@@ -184,7 +159,7 @@ class FireUploader {
             const $currentItem = $previewItems.eq(index);
             const currentDataUrl = $currentItem.find('img').attr('src');
             $zoomedImg.attr('src', currentDataUrl);
-            $zoomedImg.addClass('active-image'); // Add active class to the new image
+            $zoomedImg.addClass('active-image');
         });
 
         $nextIcon.on('click', () => {
@@ -198,9 +173,9 @@ class FireUploader {
         });
 
         $closeIcon.on('click', function (event) {
-            event.stopPropagation(); // Prevent the event from bubbling up to other elements
-            $('.zoom-popup').remove(); // Remove the entire popup
-            console.log('Close icon clicked'); // Log the click event
+            event.stopPropagation();
+            $('.zoom-popup').remove();
+            console.log('Close icon clicked');
         });
 
         // Set the initial image
@@ -208,7 +183,6 @@ class FireUploader {
         const initialDataUrl = $currentItem.find('img').attr('src');
         $zoomedImg.attr('src', initialDataUrl);
     }
-
     handleFiles(selectedFiles) {
         $.each(selectedFiles, (index, file) => {
             const extension = file.name.split('.').pop().toLowerCase();
@@ -221,10 +195,8 @@ class FireUploader {
             if (this.files.files.some(existingFile => existingFile.raw_name === file.name)) {
                 console.log(`The file ${file.name} already exists.`);
             } else {
-
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    // Create a file object
                     const newFile = {
                         size: (file.size / 1024).toFixed(3),
                         type: file.type,
@@ -237,9 +209,7 @@ class FireUploader {
                         full_path: '',
                         original_name: file.name
                     };
-                      /// not going to this condition
                     if (newFile.is_image) {
-                        // Create an image to get the dimensions
                         const img = new Image();
                         img.onload = () => {
                             newFile.dimension = img.width + '*' + img.height;
@@ -250,8 +220,7 @@ class FireUploader {
                             });
                         };
                         img.src = event.target.result;
-                    }
-                    else {
+                    } else {
                         this.addPreviewItem({
                             dataUrl: event.target.result,
                             name: file.name,
@@ -261,13 +230,12 @@ class FireUploader {
                     this.files.files.push(newFile);
                 };
                 reader.readAsDataURL(file);
-                reader.onerror = function() {
+                reader.onerror = function () {
                     console.log(reader.error);
                 };
             }
         });
     }
-
 
     handlePreloadedFiles() {
         if (this.files.fileCount > 0) {
@@ -321,7 +289,6 @@ class FireUploader {
 
             div.append(img);
 
-            // Add the label element below the image
             const fileNameLabel = $('<label>', {
                 class: 'file-name-label',
                 text: fileData.name,
@@ -329,7 +296,6 @@ class FireUploader {
 
             div.append(fileNameLabel);
         } else {
-            console.log("aaaaaa")
             const fileIcon = $('<i>', {
                 class: 'fas ' + this.getFontAwesomeClass(fileData.fileObject.extension) + ' file-icon'
             });
@@ -337,12 +303,11 @@ class FireUploader {
             const fileNameLabel = $('<label>', {
                 class: 'file-name-label',
                 text: fileData.name,
-                title: fileData.name, // Add a title attribute to show the full filename on hover
+                title: fileData.name,
             });
 
             div.append(fileIcon);
             div.append(fileNameLabel);
-
         }
 
         const dragDropIcon = $('<span>', {
@@ -364,7 +329,6 @@ class FireUploader {
         this.$preview.append(div);
     }
 
-
     getFontAwesomeClass(extension) {
         switch (extension) {
             case 'pdf':
@@ -385,10 +349,7 @@ class FireUploader {
                 return 'fa-file-alt';
             case 'zip':
             default:
-                return 'fa-file'; // Default icon for unknown file types
+                return 'fa-file';
         }
     }
-
-
-
 }
