@@ -15,7 +15,9 @@ body {
     padding: 20px;
     text-align: center;
     position: relative;
-    min-height: 100px;
+    min-height: 300px;
+    max-height: 300px; /* Choose the maximum height as per your requirement */
+    overflow: auto; /* This will create a scrollbar if the content exceeds the max-height */
 }
 
 .fireupload.dragover {
