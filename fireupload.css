@@ -86,6 +86,9 @@ body {
     color: #3366cc; /* Change the icon color to fit your design */
 }
 
+/* ... other styles ... */
+
+/* Image Preview Styles */
 .preview-item .file-name-label {
     position: absolute;
     bottom: 0;
@@ -97,18 +100,22 @@ body {
     font-size: 12px;
     text-align: center;
     white-space: nowrap;
-    overflow: visible; /* Changed from 'hidden' to 'visible' */
+    overflow: hidden; /* Revert back to 'hidden' */
     text-overflow: ellipsis;
     transition: max-height 0.3s ease;
     z-index: 1;
+    max-height: 1.0em; /* This is approximately the height of one line of text */
 }
 
-.preview-item:hover .file-name-label {
+.preview-item .file-name-label:hover {
     max-height: none;
     overflow: visible;
     white-space: normal;
     z-index: 2; /* Increase the z-index to ensure the label is displayed above other elements */
 }
+
+/* ... other styles ... */
+
 
 
 
