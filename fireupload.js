@@ -1,5 +1,6 @@
 class FireUploader {
-    constructor({dropzoneId, inputName = 'file', multipleFiles = false, files = {files: [], fileCount: 0}} = {}) {
+    constructor({dropzoneId, inputName = 'file', multipleFiles = false, files = {files: [], fileCount: 0}, allowedExtensions = []} = {}) {
+        this.allowedExtensions = allowedExtensions;
         $(".fireupload").each((index, element) => {
             if ($(element).attr('id') === dropzoneId) {
                 this.setUpInstance(element, inputName, multipleFiles, files);
@@ -210,44 +211,63 @@ class FireUploader {
 
     handleFiles(selectedFiles) {
         $.each(selectedFiles, (index, file) => {
-            if (file.type.match('image.*')) {
-                // Check if the file is already in the array
-                if (this.files.files.some(existingFile => existingFile.raw_name === file.name)) {
-                    console.log(`The file ${file.name} already exists.`);
-                } else {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
+            const extension = file.name.split('.').pop().toLowerCase();
+            if (!this.allowedExtensions.includes(extension)) {
+                alert(`The file ${file.name} is not allowed.`);
+                return true;
+            }
+
+            // Check if the file is already in the array
+            if (this.files.files.some(existingFile => existingFile.raw_name === file.name)) {
+                console.log(`The file ${file.name} already exists.`);
+            } else {
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    // Create a file object
+                    const newFile = {
+                        size: (file.size / 1024).toFixed(3),
+                        type: file.type,
+                        order: this.files.files.length + 1,
+                        thumbs: [],
+                        is_image: file.type.startsWith('image/') ? 1 : 0,
+                        raw_name: file.name,
+                        dimension: '',
+                        extension: extension,
+                        full_path: '',
+                        original_name: file.name
+                    };
+                      /// not going to this condition
+                    if (newFile.is_image) {
                         // Create an image to get the dimensions
                         const img = new Image();
                         img.onload = () => {
-                            const newFile = {
-                                size: (file.size / 1024).toFixed(3), // size of the file in kilobytes, rounded to three decimal places
-                                type: file.type, // MIME type of the file
-                                order: this.files.files.length + 1, // order of the file (assumes files array only contains current files)
-                                thumbs: [], // empty by default
-                                is_image: file.type.startsWith('image/') ? 1 : 0, // 1 if the file is an image, 0 if not
-                                raw_name: file.name, // raw name of the file
-                                dimension: img.width + '*' + img.height, // dimensions of the image, format: width*height
-                                extension: file.name.split('.').pop(), // file extension
-                                full_path: '', // by default empty because the added image is not uploaded yet
-                                original_name: file.name // the original name of the file
-                            };
-
-                            this.files.files.push(newFile);
-
+                            newFile.dimension = img.width + '*' + img.height;
                             this.addPreviewItem({
                                 dataUrl: event.target.result,
                                 name: file.name,
-                                fileObject: newFile // pass the new file object to the function
+                                fileObject: newFile
                             });
                         };
                         img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
+                    }
+                    else {
+                        this.addPreviewItem({
+                            dataUrl: event.target.result,
+                            name: file.name,
+                            fileObject: newFile
+                        });
+                    }
+                    this.files.files.push(newFile);
+                };
+                reader.readAsDataURL(file);
+                reader.onerror = function() {
+                    console.log(reader.error);
+                };
             }
         });
     }
+
 
     handlePreloadedFiles() {
         if (this.files.fileCount > 0) {
@@ -262,115 +282,113 @@ class FireUploader {
     }
 
     addPreviewItem(fileData) {
-        const img = $('<img>', {
-            src: fileData.dataUrl,
-            alt: fileData.name,
-        });
-
         const div = $('<div>', {
             class: 'preview-item',
             'data-filename': fileData.name,
         });
 
-        const iconsDiv = $('<div>', {class: 'icons'});
+        const iconsDiv = $('<div>', { class: 'icons' });
+
         const removeIcon = $('<span>', {
             class: 'remove-icon',
             html: '<i class="fas fa-trash"></i>',
         });
-        const zoomIcon = $('<span>', {
-            class: 'zoom-icon',
-            html: '<i class="fas fa-search-plus"></i>',
-        });
-        const dragDropIcon = $('<span>', {
-            class: 'drag-drop-icon',
-            html: '<i class="fas fa-arrows-alt"></i>',
-        });
-
-        iconsDiv.append(removeIcon);
-        iconsDiv.append(zoomIcon);
-        iconsDiv.append(dragDropIcon);
-
-        div.append(img);
-        div.append(iconsDiv);
-
-        // Create the hidden file input
-        const hiddenFileInput = $('<input>', {
-            type: 'hidden',
-            name: this.$fileInput.attr('name'),
-            value: JSON.stringify(fileData.fileObject), // set the value to the corresponding file object
-            class: 'hidden-file-input'
-        }).appendTo(div);
-
-        this.$preview.append(div);
 
         removeIcon.on('click', () => {
             div.remove();
-            // Remove the file from the files array
-            this.files.files = this.files.files.filter(file => file.original_name !== fileData.name);
-            // Check if there are no previewed images to show the add icon
+            this.files.files = this.files.files.filter(file => file.raw_name !== fileData.name);
             if (this.$preview.find('.preview-item').length === 0) {
                 this.$addIcon.removeClass('hidden');
             }
         });
 
+        iconsDiv.append(removeIcon);
 
-        zoomIcon.on('click', (event) => {
-
-            const $popup = $('<div>', {class: 'zoom-popup'});
-            const $zoomedImg = $('<img>', {
-                class: 'zoomed-image',
+        if (fileData.fileObject.is_image) {
+            const img = $('<img>', {
                 src: fileData.dataUrl,
-            });
-            const $closeIcon = $('<span>', {
-                class: 'close-icon',
-                html: '&times;',
-            });
-            const $prevIcon = $('<span>', {
-                class: 'nav-icon prev-icon',
-                html: '<i class="fas fa-chevron-left"></i>',
-            });
-            const $nextIcon = $('<span>', {
-                class: 'nav-icon next-icon',
-                html: '<i class="fas fa-chevron-right"></i>',
+                alt: fileData.name,
             });
 
-            $popup.append($zoomedImg);
-            $popup.append($closeIcon);
-            $popup.append($prevIcon);
-            $popup.append($nextIcon);
-            $popup.appendTo('body');
-
-            $closeIcon.on('click', function () {
-                $popup.remove();
+            const zoomIcon = $('<span>', {
+                class: 'zoom-icon',
+                html: '<i class="fas fa-search-plus"></i>',
             });
 
-            $prevIcon.on('click', () => {
-                const currentIndex = this.$preview.find('.preview-item').index(div);
-                if (currentIndex > 0) {
-                    const $prevItem = this.$preview.find('.preview-item').eq(currentIndex - 1);
-                    const prevDataUrl = $prevItem.find('img').attr('src');
-                    $zoomedImg.attr('src', prevDataUrl);
-                }
+            zoomIcon.on('click', () => this.showZoomPopup(this.$preview.find('.preview-item').index(div)));
+
+            iconsDiv.append(zoomIcon);
+
+            div.append(img);
+
+            // Add the label element below the image
+            const fileNameLabel = $('<label>', {
+                class: 'file-name-label',
+                text: fileData.name,
             });
 
-            $nextIcon.on('click', () => {
-                const currentIndex = this.$preview.find('.preview-item').index(div);
-                if (currentIndex < this.$preview.find('.preview-item').length - 1) {
-                    const $nextItem = this.$preview.find('.preview-item').eq(currentIndex + 1);
-                    const nextDataUrl = $nextItem.find('img').attr('src');
-                    $zoomedImg.attr('src', nextDataUrl);
-                }
-            });
-        });
-
-        // Move the add-icon after the last previewed image
-        if (this.$preview.find('.preview-item').length > 1 || !this.multipleFiles) {
-            this.$addIcon.appendTo(this.$preview);
-            this.$addIcon.removeClass('hidden');
+            div.append(fileNameLabel);
         } else {
-            this.$addIcon.addClass('hidden');
+            console.log("aaaaaa")
+            const fileIcon = $('<i>', {
+                class: 'fas ' + this.getFontAwesomeClass(fileData.fileObject.extension) + ' file-icon'
+            });
+
+            const fileNameLabel = $('<label>', {
+                class: 'file-name-label',
+                text: fileData.name,
+                title: fileData.name, // Add a title attribute to show the full filename on hover
+            });
+
+            div.append(fileIcon);
+            div.append(fileNameLabel);
+
         }
 
+        const dragDropIcon = $('<span>', {
+            class: 'drag-drop-icon',
+            html: '<i class="fas fa-arrows-alt"></i>',
+        });
 
+        iconsDiv.append(dragDropIcon);
+
+        div.append(iconsDiv);
+
+        const hiddenFileInput = $('<input>', {
+            type: 'hidden',
+            name: this.$fileInput.attr('name'),
+            value: JSON.stringify(fileData.fileObject),
+            class: 'hidden-file-input'
+        }).appendTo(div);
+
+        this.$preview.append(div);
     }
+
+
+    getFontAwesomeClass(extension) {
+        switch (extension) {
+            case 'pdf':
+                return 'fa-file-pdf';
+            case 'doc':
+            case 'docx':
+                return 'fa-file-word';
+            case 'xls':
+            case 'xlsx':
+                return 'fa-file-excel';
+            case 'mp3':
+                return 'fa-file-audio';
+            case 'mp4':
+            case 'avi':
+            case 'mov':
+                return 'fa-file-video';
+            case 'txt':
+                return 'fa-file-alt';
+            case 'zip':
+            default:
+                return 'fa-file'; // Default icon for unknown file types
+        }
+    }
+
+
+
 }

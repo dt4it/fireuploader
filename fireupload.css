@@ -81,6 +81,38 @@ body {
     background-color: rgba(255, 255, 255, 0.8);
 }
 
+.preview-item .file-icon {
+    font-size: 40px; /* Increase the icon size */
+    color: #3366cc; /* Change the icon color to fit your design */
+}
+
+.preview-item .file-name-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #000;
+    color: #fff;
+    padding: 5px;
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: visible; /* Changed from 'hidden' to 'visible' */
+    text-overflow: ellipsis;
+    transition: max-height 0.3s ease;
+    z-index: 1;
+}
+
+.preview-item:hover .file-name-label {
+    max-height: none;
+    overflow: visible;
+    white-space: normal;
+    z-index: 2; /* Increase the z-index to ensure the label is displayed above other elements */
+}
+
+
+
+
 /* Add Icon Styles */
 .add-icon {
     border: 2px dashed #ccc;
