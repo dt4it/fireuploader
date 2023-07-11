@@ -278,6 +278,12 @@ class FireUploader {
                 alt: fileData.name,
             });
 
+            // Handle image load error
+            img.on('error', function () {
+                // FontAwesome icon for 'not found'
+                $(this).replaceWith('<i class="fas fa-exclamation-triangle"></i>');
+            });
+
             const zoomIcon = $('<span>', {
                 class: 'zoom-icon',
                 html: '<i class="fas fa-search-plus"></i>',
