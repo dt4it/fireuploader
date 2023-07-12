@@ -184,7 +184,7 @@ class FireUploader {
         $zoomedImg.attr('src', initialDataUrl);
     }
     handleFiles(selectedFiles) {
-        const currentMaxOrder = Math.max(...this.files.files.map(file => file.order));
+        let currentMaxOrder = Math.max(...this.files.files.map(file => file.order));
 
         $.each(selectedFiles, (index, file) => {
             const extension = file.name.split('.').pop().toLowerCase();
@@ -199,11 +199,11 @@ class FireUploader {
             } else {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    const newOrder = currentMaxOrder + 1; // Increment the order based on the current maximum order value
+                    currentMaxOrder += 1; // Increment the order with each file
                     const newFile = {
                         size: (file.size / 1024).toFixed(3),
                         type: file.type,
-                        order: newOrder,
+                        order: currentMaxOrder,
                         thumbs: [],
                         is_image: file.type.startsWith('image/') ? 1 : 0,
                         raw_name: file.name,
@@ -240,6 +240,7 @@ class FireUploader {
             }
         });
     }
+
 
 
     handlePreloadedFiles() {
