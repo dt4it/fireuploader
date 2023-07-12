@@ -274,6 +274,13 @@ class FireUploader {
             div.remove();
             this.files.files = this.files.files.filter(file => file.raw_name !== fileData.name);
 
+            // Modification: Create a new FileList object and replace the old one
+            let newFileList = new DataTransfer();
+            Array.from(this.$fileInput[0].files).forEach(file => {
+                if (file.name !== fileData.name) newFileList.items.add(file);
+            });
+            this.$fileInput[0].files = newFileList.files;
+
             // Set 'action' attribute to 'removed' for the related JSON value
             const hiddenInput = $(`#${hiddenFileInputId}`);
             const hiddenFileObject = JSON.parse(hiddenInput.val());
@@ -284,6 +291,7 @@ class FireUploader {
                 this.$addIcon.removeClass('hidden');
             }
         });
+
 
         iconsDiv.append(removeIcon);
 
