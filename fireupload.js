@@ -100,15 +100,15 @@ class FireUploader {
                     this.files.files.splice(newIndex, 0, movedFile);
                     this.files.files.forEach((file, index) => {
                         file.order = index + 1;
-                    });
-                    this.$preview.find('.preview-item').each((index, previewItem) => {
-                        const $previewItem = $(previewItem);
-                        const $hiddenInput = $previewItem.find('.hidden-file-input');
-                        $hiddenInput.val(JSON.stringify(this.files.files[index]));
+                        const hiddenInput = $(`#${file.original_name.replace(/[^a-zA-Z0-9-_]/g, '_')}`);
+                        const hiddenFileObject = JSON.parse(hiddenInput.val());
+                        hiddenFileObject.order = file.order;
+                        hiddenInput.val(JSON.stringify(hiddenFileObject));
                     });
                 }
             });
         }
+
 
         this.$preview.on('click', '.preview-item', (event) => {
             const $target = $(event.target).closest('.preview-item');
@@ -184,6 +184,8 @@ class FireUploader {
         $zoomedImg.attr('src', initialDataUrl);
     }
     handleFiles(selectedFiles) {
+        const currentMaxOrder = Math.max(...this.files.files.map(file => file.order));
+
         $.each(selectedFiles, (index, file) => {
             const extension = file.name.split('.').pop().toLowerCase();
             if (!this.allowedExtensions.includes(extension)) {
@@ -197,17 +199,19 @@ class FireUploader {
             } else {
                 const reader = new FileReader();
                 reader.onload = (event) => {
+                    const newOrder = currentMaxOrder + 1; // Increment the order based on the current maximum order value
                     const newFile = {
                         size: (file.size / 1024).toFixed(3),
                         type: file.type,
-                        order: this.files.files.length + 1,
+                        order: newOrder,
                         thumbs: [],
                         is_image: file.type.startsWith('image/') ? 1 : 0,
                         raw_name: file.name,
                         dimension: '',
                         extension: extension,
                         full_path: '',
-                        original_name: file.name
+                        original_name: file.name,
+                        action: 'added' // Set the 'action' attribute to 'added'
                     };
                     if (newFile.is_image) {
                         const img = new Image();
@@ -237,9 +241,12 @@ class FireUploader {
         });
     }
 
+
     handlePreloadedFiles() {
         if (this.files.fileCount > 0) {
             $.each(this.files.files, (index, file) => {
+                // Set the 'action' attribute to 'preloaded'
+                file.action = 'preloaded';
                 this.addPreviewItem({
                     dataUrl: file.full_path,
                     name: file.original_name,
@@ -262,9 +269,17 @@ class FireUploader {
             html: '<i class="fas fa-trash"></i>',
         });
 
+        const hiddenFileInputId = `${fileData.fileObject.original_name.replace(/[^a-zA-Z0-9-_]/g, '_')}`;
         removeIcon.on('click', () => {
             div.remove();
             this.files.files = this.files.files.filter(file => file.raw_name !== fileData.name);
+
+            // Set 'action' attribute to 'removed' for the related JSON value
+            const hiddenInput = $(`#${hiddenFileInputId}`);
+            const hiddenFileObject = JSON.parse(hiddenInput.val());
+            hiddenFileObject.action = 'removed';
+            hiddenInput.val(JSON.stringify(hiddenFileObject));
+
             if (this.$preview.find('.preview-item').length === 0) {
                 this.$addIcon.removeClass('hidden');
             }
@@ -329,11 +344,14 @@ class FireUploader {
             type: 'hidden',
             name: this.$fileInput.attr('name'),
             value: JSON.stringify(fileData.fileObject),
-            class: 'hidden-file-input'
-        }).appendTo(div);
+            class: 'hidden-file-input',
+            id: hiddenFileInputId // Use the original name as the ID for the hidden input
+        });
 
+        this.$dropzone.append(hiddenFileInput);
         this.$preview.append(div);
     }
+
 
     getFontAwesomeClass(extension) {
         switch (extension) {
