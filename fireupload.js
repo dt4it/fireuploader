@@ -244,12 +244,13 @@ class FireUploader {
 
 
     handlePreloadedFiles() {
+        const baseUrl = window.location.origin; // This will get the base URL of the site
         if (this.files.fileCount > 0) {
             $.each(this.files.files, (index, file) => {
                 // Set the 'action' attribute to 'preloaded'
                 file.action = 'preloaded';
                 this.addPreviewItem({
-                    dataUrl: file.full_path,
+                    dataUrl: baseUrl + "/uploads/" + file.full_path, //@todo make this dynamic params
                     name: file.original_name,
                     fileObject: file // pass the file object from preloaded files
                 });
